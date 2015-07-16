@@ -1,0 +1,16 @@
+{
+  "name": "nget",
+  "version": "1.0.0",
+  "description": "下载视频网站视频流，并且转码",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --harmony index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "liuguanyu",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.58.0",
+    "uuid": "^2.0.1"
+  }
+}
