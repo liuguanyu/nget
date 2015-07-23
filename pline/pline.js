@@ -22,7 +22,10 @@ PLine.prototype = {
 	},
 
 	run : function (){
-		this.getExtractor().extract(this.url);
+		this.getExtractor().extract(this.url).then(function (data){
+			console.info(111);
+			console.info(data);
+		});
 	}
 };
 
