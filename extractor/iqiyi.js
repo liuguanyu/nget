@@ -32,6 +32,59 @@ var getIdsByHtml = function (html, url){
 	return [match1[1], match2[1]];
 };
 
+var getVRSXORCode = function (arg1, arg2){
+	return arg1 ^ ([103, 121, 72][arg2 % 3]);
+};
+
+var getVrsEncodeCode = function (vlink){
+	var loc6 = 0, loc2 = "",
+	    loc3 = vlink.split("-"), loc4 = loc3.length;
+
+	for(var i = loc4 - 1; i > -1; --i){
+		loc6 = getVRSXORCode(parseInt(loc3[loc4 - i - 1], 16), i);	
+		loc2 += 	String.fromCharCode(loc6);
+	}
+
+	return loc2.split('').reverse().join('');
+};
+
+var getVLnksByVMS = function (info){
+	if (info["data"]['vp']["tkl"] == ""){
+		// 有误
+	}
+
+	var bid = 0, vlnks;
+
+	info["data"]["vp"]["tkl"][0]["vs"].forEach(function (el, i){
+	    var elBid = parseInt(el["bid"], 10);
+
+	    if ((elBid <= 10) && (elBid >= bid)){
+	    		bid = elBid;
+	    		
+	    		vlnks = el["fs"];
+
+	    		if (el["fs"][0]["l"][0] != "/"){
+	    			if (getVrsEncodeCode(el["fs"][0]["l"]).substr(-3) == "mp4"){
+	    				vlnks = el["flvs"]
+	    			}
+	    		}
+	    }
+	});
+
+	return vlnks;
+};
+
+var getDispathKey = function (rid){
+	var url = "http://data.video.qiyi.com/t?tn=" + Math.random();
+
+	return util.httpUtil.getHtml(url).then(function (data){
+		var tp = ")(*&^flash@#$%a";  // swf 里面的处理
+		var t  = Math.floor((JSON.parse(data)["t"])/6e5)
+
+		return md5(t + tp + rid);
+	});
+};
+
 var iqiyi = function (){};
 
 iqiyi.prototype = {
@@ -41,7 +94,25 @@ iqiyi.prototype = {
 			    ids = getIdsByHtml(html);
 			
 			return getVMS(ids[0], ids[1], uid).then(function(data){
-				return this.resolve(data);	
+				var info = JSON.parse(data),
+				    title = info["data"]["vi"]["vn"],
+				    urls = [],
+    					size = 0,
+				    vLnks = getVLnksByVMS(info);
+
+				vLnks.forEach(function (el, i){
+					vlink = el["l"];
+
+			        if (vlink[0] != "/"){ //编码过的
+			            vlink = getVrsEncodeCode(vlink);
+			        }
+
+			        getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
+			        		console.info(1111);
+			        		console.info(data);
+			        });
+				});
+  
 			});
 		});
 	}
