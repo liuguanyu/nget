@@ -1,4 +1,8 @@
 var headers = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Charset': 'UTF-8,*;q=0.5',
+    'Accept-Encoding': 'gzip,deflate,sdch',
+    'Accept-Language': 'en-US,en;q=0.8',	
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0'
 };
 
@@ -9,20 +13,30 @@ var urlparse = require('url').parse;
 var http = require('http');
 
 var httpUtil = {
-	getHtml : function (url){
+	getHtml : function (url, interval){
 		var opt = {
 			'headers' : headers,
 			'url' : url
 		}
 
 		return new Promise(function (resolve, reject){
-			request(opt, function (err, response, body){
-				if (err){
-					reject(err);
-				}	
+			var doRequest = function (){
+				request(opt, function (err, response, body){
+					if (err){
+						reject(err);
+					}	
 
-				resolve(body);
-			});
+					resolve(body);
+				});
+			};	
+
+			if (typeof interval === "undefined"){
+				doRequest();
+			}
+			else{
+				console.info();
+				setTimeout(doRequest, interval);
+			}
 		});
 	}
 }

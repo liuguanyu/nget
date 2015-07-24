@@ -75,12 +75,12 @@ var getVLnksByVMS = function (info){
 	return vlnks;
 };
 
-var getDispathKey = function (rid){
+var getDispathKey = function (rid, interval){
 	var url = "http://data.video.qiyi.com/t?tn=" + Math.random();
 
-	return util.httpUtil.getHtml(url).then(function (data){
+	return util.httpUtil.getHtml(url, interval).then(function (data){
 		var tp = ")(*&^flash@#$%a";  // swf 里面的处理
-		var t  = Math.floor((JSON.parse(data)["t"])/6e2)
+		var t  = Math.floor((JSON.parse(data)["t"])/6e2);
 
 		return md5(t + tp + rid);
 	});
