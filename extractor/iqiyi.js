@@ -86,50 +86,71 @@ var getDispathKey = function (rid){
 	});
 };
 
+var analyseVMSCode = function(data, url, uid){
+	var info = JSON.parse(data),
+	    title = info["data"]["vi"]["vn"],
+	    urls, vLnks = getVLnksByVMS(info);
+
+	urls = vLnks.map(function (el, i){
+		vlink = el["l"];
+
+        if (vlink[0] != "/"){ //编码过的
+            vlink = getVrsEncodeCode(vlink);
+        }
+
+        return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
+        		var baseUrlInfo, baseUrl, url;
+
+        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
+        		baseUrlInfo.splice(-1, 0 , data);
+        		baseUrl = baseUrlInfo.join("/");
+
+        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "");
+        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
+
+        		return util.httpUtil.getHtml(url).then(function (data){
+        			return {
+        				link : JSON.parse(data)["l"],
+        				size : el["b"]
+        			};	
+        		});
+        });
+	});
+
+	return Promise.all(urls).then(function(){
+		var size = 0, us = [], rets = {};
+
+		for (var i in arguments){
+			for(var j in arguments[i]){
+				size += arguments[i][j].size;
+				us.push(arguments[i][j].link);
+			}
+		}
+
+		rets = {
+			size : size,
+			urls : us,
+			title : title
+		};
+
+		return rets;
+	});
+};
+
 var iqiyi = function (){};
 
 iqiyi.prototype = {
 	extract : function (url){
-		return util.httpUtil.getHtml(url).then(function (html, url){
+		return util.httpUtil.getHtml(url).then(function (html){
 			var uid = uuid.v4().replace(/-/g, ""),
 			    ids = getIdsByHtml(html);
 			
-			return getVMS(ids[0], ids[1], uid).then(function(data){
-				var info = JSON.parse(data),
-				    title = info["data"]["vi"]["vn"],
-				    urls = [],
-    					size = 0,
-				    vLnks = getVLnksByVMS(info);
-
-				vLnks.forEach(function (el, i){
-					vlink = el["l"];
-
-			        if (vlink[0] != "/"){ //编码过的
-			            vlink = getVrsEncodeCode(vlink);
-			        }
-
-			        return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
-			        		// size += el["b"];
-
-			        		var baseUrlInfo, baseUrl, url;
-
-			        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
-			        		baseUrlInfo.splice(-1, 0 , data);
-			        		baseUrl = baseUrlInfo.join("/");
-
-			        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "")
-			        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
-
-			        		return util.httpUtil.getHtml(url).then(function (data){
-			        			urls.push(JSON.parse(data)["l"]);
-
-			        			return urls;
-			        		});
-			        });
+			return getVMS(ids[0], ids[1], uid).then(function (data){
+				return analyseVMSCode(data, url, uid).then(function(data){
+					return data;
 				});
-  
 			});
-		});
+		});	
 	}
 }
 

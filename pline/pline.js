@@ -1,3 +1,5 @@
+var util = require("../util/util.js");
+
 var getSiteNameByUrl = function (url){
 	var match = url.match(/https?:\/\/([^\/]+)\//);
 
@@ -21,8 +23,34 @@ PLine.prototype = {
 		return this.extractor;
 	},
 
+	download : function (data){
+		console.log("正在下载：" + data.title);
+		console.log("总大小：" + util.spaceUtil.getSize(data.size));		
+		console.log("分块数：" + data.urls.length);	
+
+		util.downloadUtil.download(data.urls);
+	},
+
+	transcode : function (data){
+
+	},
+
+	clean : function (data){
+
+	},
+
 	run : function (){
-		this.getExtractor().extract(this.url);
+		var self = this;
+
+		this.getExtractor().extract(this.url).then(function (data){
+			return self.download(data);	
+		}).then(function (data){
+			return self.transcode(data, "mov");
+		}).then(function (data){
+			self.clean(data);
+		}).then(function (){
+			console.log("任务完成");
+		});
 	}
 };
 
