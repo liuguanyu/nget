@@ -30,7 +30,7 @@ PLine.prototype = {
 		console.log("总大小：" + util.spaceUtil.getSize(data.size));		
 		console.log("分块数：" + data.urls.length);
 
-		this.workPath = 	__dirname;
+		this.workPath = 	path.resolve(__dirname, "..");
 
 		return util.downloadUtil.download(data.urls);
 	},
