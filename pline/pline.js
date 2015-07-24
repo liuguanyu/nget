@@ -35,15 +35,25 @@ PLine.prototype = {
 		var promises = []; 
 		var transcoder = require("../transcoder/" + getSiteNameByUrl(this.url) + ".js");
 
-		console.info(transcoder);
-
 		data.forEach(function (el){
 			promises.push(el.then(function (node){
 				return transcoder.transcode(node);
 			}));		
 		});	
 
-		return promises;									
+		return Promise.all(promises)	.then(function (){
+			var rets = [];
+
+			for (var i in arguments){
+				rets.push(arguments[i]);
+			}
+
+			rets.sort(function (a, b){
+				return a.idx > b.idx;
+			});
+
+			return transcoder.mergeAndTranscode(rets);
+		});							
 	},
 
 	clean : function (data){
@@ -54,6 +64,7 @@ PLine.prototype = {
 		var self = this;
 
 		this.getExtractor().extract(this.url).then(function (data){
+			self.title = data.title;
 			return self.download(data);	
 		}).then(function (data){
 			return self.transcode(data, "mov"); // 暂时只加mov
@@ -61,6 +72,8 @@ PLine.prototype = {
 			self.clean(data);
 		}).then(function (){
 			console.log("任务完成");
+		}).catch(function (err){
+			console.log(err);
 		});
 	}
 };
