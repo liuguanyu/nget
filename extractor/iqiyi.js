@@ -4,7 +4,7 @@ var md5 = require("md5");
 var util = require("../util/util.js");
 
 var mix = function (tvid){
-    var enc = [], src="hsalf", tm = Math.floor(Math.random() * (4000 - 2000)) + 2000;
+    var enc = [], src="hsalf", tm = Math.floor(Math.random() * (4000 - 2000) + 2000);
     	enc.push("8e29ab5666d041c3a1ea76e06dabdffb");
 	enc.push(tm);
 	enc.push(tvid);
@@ -79,7 +79,7 @@ var getDispathKey = function (rid){
 
 	return util.httpUtil.getHtml(url).then(function (data){
 		var tp = ")(*&^flash@#$%a";  // swf 里面的处理
-		var t  = Math.floor((JSON.parse(data)["t"])/6e5)
+		var t  = Math.floor((JSON.parse(data)["t"])/6e2)
 
 		return md5(t + tp + rid);
 	});
@@ -107,9 +107,23 @@ iqiyi.prototype = {
 			            vlink = getVrsEncodeCode(vlink);
 			        }
 
-			        getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
-			        		console.info(1111);
-			        		console.info(data);
+			        return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
+			        		// size += el["b"];
+
+			        		var baseUrlInfo, baseUrl, url;
+
+			        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
+			        		baseUrlInfo.splice(-1, 0 , data);
+			        		baseUrl = baseUrlInfo.join("/");
+
+			        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "")
+			        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
+
+			        		return util.httpUtil.getHtml(url).then(function (data){
+			        			urls.push(JSON.parse(data)["l"]);
+
+			        			return urls;
+			        		});
 			        });
 				});
   
