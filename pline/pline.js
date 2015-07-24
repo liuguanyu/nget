@@ -28,11 +28,22 @@ PLine.prototype = {
 		console.log("总大小：" + util.spaceUtil.getSize(data.size));		
 		console.log("分块数：" + data.urls.length);	
 
-		util.downloadUtil.download(data.urls);
+		return util.downloadUtil.download(data.urls);
 	},
 
-	transcode : function (data){
+	transcode : function (data, postfix){ 
+		var promises = []; 
+		var transcoder = require("../transcoder/" + getSiteNameByUrl(this.url) + ".js");
 
+		console.info(transcoder);
+
+		data.forEach(function (el){
+			promises.push(el.then(function (node){
+				return transcoder.transcode(node);
+			}));		
+		});	
+
+		return promises;									
 	},
 
 	clean : function (data){
@@ -45,7 +56,7 @@ PLine.prototype = {
 		this.getExtractor().extract(this.url).then(function (data){
 			return self.download(data);	
 		}).then(function (data){
-			return self.transcode(data, "mov");
+			return self.transcode(data, "mov"); // 暂时只加mov
 		}).then(function (data){
 			self.clean(data);
 		}).then(function (){
