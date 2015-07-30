@@ -2,7 +2,7 @@ var headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Charset': 'UTF-8,*;q=0.5',
     'Accept-Encoding': 'gzip,deflate,sdch',
-    'Accept-Language': 'en-US,en;q=0.8',	
+    'Accept-Language': 'en-US,en;q=0.8',
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0'
 };
 
@@ -11,6 +11,7 @@ var path = require("path");
 var request = require('request');
 var urlparse = require('url').parse;
 var http = require('http');
+var zlib = require('zlib');
 
 var httpUtil = {
 	getHtml : function (url, interval){
@@ -20,24 +21,45 @@ var httpUtil = {
 		}
 
 		return new Promise(function (resolve, reject){
-			var doRequest = function (){
-				request(opt, function (err, response, body){
-					if (err){
-						reject(err);
-					}	
+			var req = request.get(opt);
 
-					resolve(body);
+			req.on('response', function(res) {
+				var chunks = [];
+
+				res.on('data', function(chunk) {
+					chunks.push(chunk);
 				});
-			};	
 
-			if (typeof interval === "undefined"){
-				doRequest();
-			}
-			else{
-				console.info();
-				setTimeout(doRequest, interval);
-			}
-		});
+				res.on('end', function() {
+					var buffer = Buffer.concat(chunks);
+					var encoding = res.headers['content-encoding'];
+
+					if (encoding == 'gzip') {
+						zlib.gunzip(buffer, function(err, decoded) {
+							if (err){
+								reject(err);
+							}
+							console.info(decoded);
+							resolve(decoded.toString());
+						});
+					} 
+					else if (encoding == 'deflate') {
+						zlib.inflate(buffer, function(err, decoded) {
+							if (err){
+								reject(err);
+							}
+							resolve(decoded.toString());
+						});
+					} 
+					else {
+						resolve(buffer.toString());
+					}
+				});
+			});
+			req.on('error', function(err) {
+				reject(err);
+			});
+		});	
 	}
 }
 

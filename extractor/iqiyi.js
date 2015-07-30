@@ -142,6 +142,7 @@ var iqiyi = function (){};
 iqiyi.prototype = {
 	extract : function (url){
 		return util.httpUtil.getHtml(url).then(function (html){
+			console.info(html);
 			var uid = uuid.v4().replace(/-/g, ""),
 			    ids = getIdsByHtml(html);
 			
@@ -150,6 +151,8 @@ iqiyi.prototype = {
 					return data;
 				});
 			});
+		}, function (err){
+			console.info(err);
 		});	
 	}
 }
