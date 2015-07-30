@@ -78,7 +78,7 @@ var getVLnksByVMS = function (info){
 var getDispathKey = function (rid, interval){
 	var url = "http://data.video.qiyi.com/t?tn=" + Math.random();
 
-	return util.httpUtil.getHtml(url, interval).then(function (data){
+	return util.httpUtil.getHtml(url).then(function (data){
 		var tp = ")(*&^flash@#$%a";  // swf 里面的处理
 		var t  = Math.floor((JSON.parse(data)["t"])/6e2);
 
@@ -98,23 +98,25 @@ var analyseVMSCode = function(data, url, uid){
             vlink = getVrsEncodeCode(vlink);
         }
 
-        return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
-        		var baseUrlInfo, baseUrl, url;
+        return (function (vlink){
+        		return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
+	        		var baseUrlInfo, baseUrl, url;
 
-        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
-        		baseUrlInfo.splice(-1, 0 , data);
-        		baseUrl = baseUrlInfo.join("/");
+	        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
+	        		baseUrlInfo.splice(-1, 0 , data);
+	        		baseUrl = baseUrlInfo.join("/");
 
-        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "");
-        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
+	        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "");
+	        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
 
-        		return util.httpUtil.getHtml(url).then(function (data){
-        			return {
-        				link : JSON.parse(data)["l"],
-        				size : el["b"]
-        			};	
+	        		return util.httpUtil.getHtml(url).then(function (data){
+	        			return {
+	        				link : JSON.parse(data)["l"],
+	        				size : el["b"]
+	        			};	
+	        		});
         		});
-        });
+        	})(vlink);	
 	});
 
 	return Promise.all(urls).then(function(){
@@ -142,7 +144,6 @@ var iqiyi = function (){};
 iqiyi.prototype = {
 	extract : function (url){
 		return util.httpUtil.getHtml(url).then(function (html){
-			console.info(html);
 			var uid = uuid.v4().replace(/-/g, ""),
 			    ids = getIdsByHtml(html);
 			

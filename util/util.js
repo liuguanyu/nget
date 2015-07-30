@@ -14,7 +14,7 @@ var http = require('http');
 var zlib = require('zlib');
 
 var httpUtil = {
-	getHtml : function (url, interval){
+	getHtml : function (url){
 		var opt = {
 			'headers' : headers,
 			'url' : url
@@ -39,7 +39,6 @@ var httpUtil = {
 							if (err){
 								reject(err);
 							}
-							console.info(decoded);
 							resolve(decoded.toString());
 						});
 					} 
