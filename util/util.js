@@ -119,9 +119,10 @@ var downloadUtil = {
 		workPath = util.fsUtil.mkdir(workPath); // 如有重名，会改变
 
 		var downloaders = urls.map(function (el, i){
-			var file = path.resolve(workPath, '.', i + "");
+			var file = path.resolve(workPath, '.', i + ".f4v");
 
-			return util.downloadUtil
+			return (function (el){
+				return util.downloadUtil
 				   .downloadAndSave(el, file)
 				   .then(function (data){
 				   	   return {
@@ -130,7 +131,7 @@ var downloadUtil = {
 				   	   	   file : file
 				   	   };
 				   });
-		
+			})(el);
 		});
 
 		return downloaders;
