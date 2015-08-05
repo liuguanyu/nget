@@ -15,11 +15,9 @@ var getVideoInfo = function (html){
 };
 
 var strsum = function (data){
-	s = 0
-	for (var c in data) {
-	    s = s*131 + ord(c)
-	}
-	return 0x7fffffff & s
+	return 0x7fffffff & data.reduce(function (s, el){
+		return s * 131 + String.charCodeAt(el);
+	}, 0);
 };    
 
 var ccc = function (timestamp){
@@ -27,6 +25,7 @@ var ccc = function (timestamp){
         s1 = '537e6f0425c50d7a711f4af6af719e05d41d8cd98f00b204e9800998ecf8427e8afc2cf649f5c36c4fa3850ff01c1863d41d8cd98100b204e9810998ecf84271',
         d = [0x3039, 0x02, timestamp, playerPlatform, strsum(playerVersion), strsum(s1)],
         data = [0xa6, 0xf1, 0xd9, 0x2a, 0x82, 0xc8, 0xd8, 0xfe, 0x43];
+
 
 
 };
@@ -38,11 +37,7 @@ var loadKey = function (){
 //				return 
 			} 
 
-			var t = parseInt(result["root"]["t"][0], 10);
-
-			console.log(t);
-
-			return t;
+			return ccc(parseInt(result["root"]["t"][0], 10))
 		});
 	});
     // tree = ET.fromstring(get_content(url))
