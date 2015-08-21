@@ -49,12 +49,8 @@ PLine.prototype = {
 		return Promise.all(promises).then(function (){
 			var rets = [];
 
-			[].slice.call(arguments)[0].forEach(function(el){
+			arguments[0].forEach(function(el){
 				rets.push(el);
-			})
-
-			rets.sort(function (a, b){
-				return a.idx > b.idx;
 			});
 
 			var finalFile = path.resolve(self.workPath + "/" + self.title + "." + postfix);

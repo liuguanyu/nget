@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 var iqiyi = {
 	transcode : function (node){
         var targetFile = path.resolve(node.path, '.', node.idx + ".ts");
-        var cmd = "ffmpeg -i " + node.file + " -vcodec copy -acodec copy -vbsf h264_mp4toannexb " + targetFile + " ";
+        var cmd = "ffmpeg -i " + node.file + " -vcodec copy -acodec copy -vbsf h264_mp4toannexb " + targetFile + " -loglevel -8";
 
         return new Promise(function (resolve, reject){
     	    exec(cmd, function (err, stdout, stderr){
@@ -35,7 +35,7 @@ var iqiyi = {
 
 	    var targetFile = path.resolve(myPath, '.', "output.mp4");
 
-      	var cmd = 'ffmpeg -i concat:\"' + rets.join("|") + '\" -acodec copy -vcodec copy -absf aac_adtstoasc \"' + targetFile + '\"';
+      	var cmd = 'ffmpeg -i concat:\"' + rets.join("|") + '\" -acodec copy -vcodec copy -absf aac_adtstoasc \"' + targetFile + '\" -loglevel  -8';
 
 		return new Promise(function (resolve, reject){
 		    exec(cmd, function (err, stdout, stderr){
@@ -48,7 +48,7 @@ var iqiyi = {
 		    });
 		}).then(function (){
             return new Promise(function (resolve, reject){
-                var cmd = "ffmpeg -y -i " + targetFile + " \"" + finalFile + "\"";
+                var cmd = "ffmpeg -y -i " + targetFile + " \"" + finalFile + "\" -loglevel  -8";
 
                 exec(cmd, function (err, stdout, stderr){
                     if (err){
