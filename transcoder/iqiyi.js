@@ -2,8 +2,6 @@ var path = require("path");
 var fs   = require("fs");
 var exec = require('child_process').exec;
 
-var ffmpeg = require('ffmpeg');
-
 var iqiyi = {
 	transcode : function (node){
         var targetFile = path.resolve(node.path, '.', node.idx + ".ts");
