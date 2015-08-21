@@ -32,7 +32,7 @@ PLine.prototype = {
 
 		this.workPath = path.resolve(__dirname, "..");
 
-		return util.downloadUtil.download(data.urls);
+		return util.downloadUtil.download(data.urls, data.site_postfix);
 	},
 
 	transcode : function (data, postfix){

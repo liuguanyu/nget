@@ -1,3 +1,4 @@
+var postfix = "f4v";
 var uuid = require("uuid");
 var md5 = require("md5");
 
@@ -23,7 +24,7 @@ var getVMS = function (tvid, vid, uid){
      vmsreq += "&qyid=" + uid + "&tn=" + Math.random() +"&um=0";
      vmsreq += "&authkey=" + md5([params[0], tvid].join(''));
 
-     return util.httpUtil.getHtml(vmsreq);           
+     return util.httpUtil.getHtml(vmsreq);
 };
 
 var getIdsByHtml = function (html, url){
@@ -42,7 +43,7 @@ var getVrsEncodeCode = function (vlink){
 	    loc3 = vlink.split("-"), loc4 = loc3.length;
 
 	for(var i = loc4 - 1; i > -1; --i){
-		loc6 = getVRSXORCode(parseInt(loc3[loc4 - i - 1], 16), i);	
+		loc6 = getVRSXORCode(parseInt(loc3[loc4 - i - 1], 16), i);
 		loc2 += 	String.fromCharCode(loc6);
 	}
 
@@ -61,7 +62,7 @@ var getVLnksByVMS = function (info){
 
 	    if ((elBid <= 10) && (elBid >= bid)){
 	    		bid = elBid;
-	    		
+
 	    		vlnks = el["fs"];
 
 	    		if (el["fs"][0]["l"][0] != "/"){
@@ -99,24 +100,24 @@ var analyseVMSCode = function(data, url, uid){
         }
 
         return (function (vlink){
-        		return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
-	        		var baseUrlInfo, baseUrl, url;
+    		return getDispathKey(vlink.split("/").pop().split(".")[0]).then(function(data){
+        		var baseUrlInfo, baseUrl, url;
 
-	        		baseUrlInfo = info["data"]["vp"]["du"].split("/");			        		
-	        		baseUrlInfo.splice(-1, 0 , data);
-	        		baseUrl = baseUrlInfo.join("/");
+        		baseUrlInfo = info["data"]["vp"]["du"].split("/");
+        		baseUrlInfo.splice(-1, 0 , data);
+        		baseUrl = baseUrlInfo.join("/");
 
-	        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "");
-	        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
+        		url = baseUrl + vlink + '?su=' + uid + '&qyid=' + uuid.v4().replace(/-/g, "");
+        		url += '&client=&z=&bt=&ct=&tn=' + (Math.floor(Math.random() * (20000 - 10000) + 10000));
 
-	        		return util.httpUtil.getHtml(url).then(function (data){
-	        			return {
-	        				link : JSON.parse(data)["l"],
-	        				size : el["b"]
-	        			};	
-	        		});
+        		return util.httpUtil.getHtml(url).then(function (data){
+        			return {
+        				link : JSON.parse(data)["l"],
+        				size : el["b"]
+        			};
         		});
-        	})(vlink);	
+    		});
+        })(vlink);
 	});
 
 	return Promise.all(urls).then(function(){
@@ -146,15 +147,16 @@ iqiyi.prototype = {
 		return util.httpUtil.getHtml(url).then(function (html){
 			var uid = uuid.v4().replace(/-/g, ""),
 			    ids = getIdsByHtml(html);
-			
+
 			return getVMS(ids[0], ids[1], uid).then(function (data){
 				return analyseVMSCode(data, url, uid).then(function(data){
+					data.site_postfix = postfix;
 					return data;
 				});
 			});
 		}, function (err){
 			console.info(err);
-		});	
+		});
 	}
 }
 

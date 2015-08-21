@@ -41,7 +41,7 @@ var httpUtil = {
 							}
 							resolve(decoded.toString());
 						});
-					} 
+					}
 					else if (encoding == 'deflate') {
 						zlib.inflate(buffer, function(err, decoded) {
 							if (err){
@@ -49,7 +49,7 @@ var httpUtil = {
 							}
 							resolve(decoded.toString());
 						});
-					} 
+					}
 					else {
 						resolve(buffer.toString());
 					}
@@ -58,14 +58,14 @@ var httpUtil = {
 			req.on('error', function(err) {
 				reject(err);
 			});
-		});	
+		});
 	}
 }
 
 var spaceUtil = {
 	getSize : function (size){
 	    return size + "Bytes";
-	}	
+	}
 };
 
 var fsUtil = {
@@ -77,7 +77,7 @@ var fsUtil = {
 	    fs.mkdirSync(dir);
 
 	    return dir;
-    }	 	
+    }
 
 };
 
@@ -111,7 +111,7 @@ var downloadUtil = {
 		});
 	},
 
-	download : function (urls, workPath){
+	download : function (urls, downloadPostfix, workPath){
 		if (typeof workPath === "undefined"){
 			workPath = path.resolve(__dirname, '..', (+new Date()) + '');
 		}
@@ -119,7 +119,7 @@ var downloadUtil = {
 		workPath = util.fsUtil.mkdir(workPath); // 如有重名，会改变
 
 		var downloaders = urls.map(function (el, i){
-			var file = path.resolve(workPath, '.', i + ".f4v");
+			var file = path.resolve(workPath, '.', [i, ".", downloadPostfix].join(''));
 
 			return (function (el){
 				return util.downloadUtil
