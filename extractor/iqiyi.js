@@ -158,6 +158,6 @@ iqiyi.prototype = {
 			console.info(err);
 		});
 	}
-}
+};
 
 module.exports = iqiyi;

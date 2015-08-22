@@ -2,7 +2,7 @@ var path = require("path");
 var fs   = require("fs");
 var exec = require('child_process').exec;
 
-var iqiyi = {
+module.exports = {
 	transcode : function (node){
         var targetFile = path.resolve(node.path, '.', node.idx + ".ts");
         var cmd = "ffmpeg -i " + node.file + " -vcodec copy -acodec copy -vbsf h264_mp4toannexb " + targetFile + " -loglevel -8";
@@ -64,5 +64,3 @@ var iqiyi = {
         });
 	}
 };
-
-module.exports = iqiyi;

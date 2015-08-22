@@ -9,7 +9,9 @@ var getSiteNameByUrl = function (url){
 		throw new Exception("Error url!");
 	}
 
-	return match[1].split(".")[1];
+	var siteInfo = match[1].split(".");
+	
+	return siteInfo[siteInfo.length - 2];
 };
 
 var PLine = function (url){
