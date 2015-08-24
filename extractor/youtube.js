@@ -24,22 +24,21 @@ var youtube = function (){};
 
 youtube.prototype = {
     extract : function (url){
-        return util.httpUtil.getHtml("http://www.youtube.com/get_video_info?video_id=" + getVidFromUrl(url)).then(function (data){
+        var infoUrl = "http://www.youtube.com/get_video_info?video_id=" + getVidFromUrl(url);
+        var ua = 'Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19';
+
+        return util.httpUtil.getHtml(infoUrl, ua).then(function (data){
             var info = qs.parse(data),
                 title = info["title"],
                 streams = qs.parse(info["url_encoded_fmt_stream_map"]),
                 urls = streams["url"];
 
-            console.info(info);
-
             return {
                 "title" : title,
                 "urls"  : (Array.isArray(urls) ? [urls[0]] : [urls]),
-                "size"  : 1,
-                "postfix" : postfix
+                "size"  : "N/A",
+                "site_postfix" : postfix
             };
-
-            var ret = {"title" : title , "urls" : (Array.isArray(urls) ? [urls[0]] : [urls])};
         })
     }
 };

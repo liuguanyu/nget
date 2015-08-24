@@ -14,7 +14,11 @@ var http = require('http');
 var zlib = require('zlib');
 
 var httpUtil = {
-	getHtml : function (url){
+	getHtml : function (url, userAgent){
+		if (userAgent){
+			headers["User-Agent"] = userAgent;
+		}
+
 		var opt = {
 			'headers' : headers,
 			'url' : url
