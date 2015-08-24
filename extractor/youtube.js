@@ -1,70 +1,47 @@
-/**
- * Created by jiangli on 15/1/6.
- */
-
-"use strict";
-var request = require('request');
+var postfix = "mp4";
 var crypto = require('crypto');
-var urlparts = require('urlparts');
+var urlparse = require('url').parse;
 var qs = require('qs');
-var request = require('request');
 
-/**
- * [_parseIqiyi 解析爱奇艺视频]
- * @param  [type] $url [description]
- * @return [type]      [description]
- */
+var util = require("../util/util.js");
+
 var getVidFromUrl = function (url){
     var matches = url.match(/youtu\.be\/([^/]+)/)
          || url.match(/youtube\.com\/embed\/([^/?]+)/)
          || url.match(/youtube\.com\/v\/([^\/?]+)/) ;
 
     if (matches) return matches[1];
-    
-    var urlInfo = urlparts(url);
-    var qsList = qs.parse(urlInfo["query"]);
 
+    var urlInfo = urlparse(url);
+    var qsList = qs.parse(urlInfo["query"]);
 
     if (qsList["v"]){
         return qsList["v"];
     }
 };
 
-module.exports = function($url,callback){
-    var vid = getVidFromUrl($url);
+var youtube = function (){};
 
-    var options = {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19'
-        }
-    };
+youtube.prototype = {
+    extract : function (url){
+        return util.httpUtil.getHtml("http://www.youtube.com/get_video_info?video_id=" + getVidFromUrl(url)).then(function (data){
+            var info = qs.parse(data),
+                title = info["title"],
+                streams = qs.parse(info["url_encoded_fmt_stream_map"]),
+                urls = streams["url"];
 
-    var options1 = JSON.parse(JSON.stringify(options));
+            console.info(info);
 
-    options1["url"] = "http://www.youtube.com/get_video_info?video_id=" + vid;
+            return {
+                "title" : title,
+                "urls"  : (Array.isArray(urls) ? [urls[0]] : [urls]),
+                "size"  : 1,
+                "postfix" : postfix
+            };
 
-    request(options1 , function(er, response, body) {
-        if (er){
-            throw er;
-        }
+            var ret = {"title" : title , "urls" : (Array.isArray(urls) ? [urls[0]] : [urls])};
+        })
+    }
+};
 
-        var info = qs.parse(body);
-        var title = info["title"];
-
-        var streams = qs.parse(info["url_encoded_fmt_stream_map"]);
-
-        var urls = streams["url"];
-
-        var ret = {"title" : title , "urls" : (Array.isArray(urls) ? [urls[0]] : [urls])};
-
-        return callback(null, ret)
-
-        // if (Array.isArray(urls)){
-        //     return callback(null, urls);
-        // }
-        // else{
-        //     return callback(null, [urls]);
-        // }
-        
-    });
-}
+module.exports = youtube;
