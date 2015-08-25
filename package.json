@@ -1,5 +1,5 @@
 {
-  "name": "nget",
+  "name": "ngetter",
   "version": "1.0.0",
   "description": "下载视频网站视频流，并且转码",
   "main": "index.js",
