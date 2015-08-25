@@ -8,7 +8,7 @@ var promise = new Promise(function(resolve){
 	if (args[0] == "."){
 		fs.readFile("download.txt", function (err, data){
 			if (err) throw err;
-			resolve(data.split("\n"));
+			resolve(data.toString().split("\n"));
 		});
 	}
 	else if (args.length) {
