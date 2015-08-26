@@ -3,16 +3,15 @@
 var fs = require("fs");
 var PLine = require("./pline/pline.js");
 
-var args = process.argv.slice(2);
 var promise = new Promise(function(resolve){
-	if (args[0] == "."){
+	if (process.stdin.isTTY){
 		fs.readFile("download.txt", function (err, data){
 			if (err) throw err;
 			resolve(data.toString().split("\n"));
 		});
 	}
-	else if (args.length) {
-		resolve(args);
+	else if (process.argv > 2) {
+		resolve(process.argv.slice(2));
 	}
 	else {
 		var data = "";
