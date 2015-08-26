@@ -1,37 +1,28 @@
-#!node --harmony
+#!/usr/bin/env node 
+var cli = require("commander");
 
-var fs = require("fs");
-var PLine = require("./pline/pline.js");
+cli.
+	allowUnknownOption().
+	version( require("./package.json").version ).
+	option("-f, --file [value]", "download urls' file").
+	option("-u, --url [value]", "download url").
+	option("-d, --download [value]", "download folder").
+	option("-t, --thread [value]", "download thread number").
+	parse( process.argv );
 
-var promise = new Promise(function(resolve){
-	if (process.stdin.isTTY){
-		fs.readFile("download.txt", function (err, data){
-			if (err) throw err;
-			resolve(data.toString().split("\n"));
-		});
-	}
-	else if (process.argv > 2) {
-		resolve(process.argv.slice(2));
-	}
-	else {
-		var data = "";
-		process.stdin.resume(); // Compatible with "old" stream
-		process.stdin.setEncoding('utf8');
-		process.stdin.on('data', function(chunk) {
-			data += chunk.toString();
-		});
+//线程数参数设置
+var thread = 5;
+if(cli.thread && typeof(cli.thread)=="string") thread = parseInt(cli.thread);
 
-		process.stdin.on('end', function() {
-			resolve(data.split("\n"));
-		});
-	}
-});
+//下载地址配置
+var folder = "./";
+if(cli.download && typeof(cli.download)=="string") folder = cli.download;
 
-promise.then(function (downloadList) {
-	downloadList.filter(function (el){
-		return (el.trim() !== "");
-	}).forEach(function (el){
-		var pline = new PLine(el);
-		pline.run();
-	});
-})
+var download = require("./util/download.js")(folder, thread);
+//检测是否是管道
+if(!process.stdin.isTTY) return download.pipe();
+
+//非管道检测有下载列表，有下载URL，无下载列表和下载URL三种情况，优先级下载列表大于URL
+if(cli.file && typeof(cli.file)=="string") return download.file(cli.file);
+else if(cli.url && typeof(cli.url)=="string") return download.url(cli.url);
+else return download.file("./download.txt");
