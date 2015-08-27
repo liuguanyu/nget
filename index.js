@@ -18,11 +18,11 @@ if(cli.thread && typeof(cli.thread)=="string") thread = parseInt(cli.thread);
 var folder = "./";
 if(cli.download && typeof(cli.download)=="string") folder = cli.download;
 
-var download = require("./util/download.js")(folder, thread);
+var dispatch = require("./pline/dispatch.js")(folder, thread);
 //检测是否是管道
-if(!process.stdin.isTTY) return download.pipe();
+if(!process.stdin.isTTY) return dispatch.pipe();
 
 //非管道检测有下载列表，有下载URL，无下载列表和下载URL三种情况，优先级下载列表大于URL
-if(cli.file && typeof(cli.file)=="string") return download.file(cli.file);
-else if(cli.url && typeof(cli.url)=="string") return download.url(cli.url);
-else return download.file("./download.txt");
+if(cli.file && typeof(cli.file)=="string") return dispatch.file(cli.file);
+else if(cli.url && typeof(cli.url)=="string") return dispatch.url(cli.url);
+else return dispatch.file("./download.txt");
