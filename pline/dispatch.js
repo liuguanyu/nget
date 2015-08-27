@@ -1,8 +1,8 @@
 var PLine = require("./pline.js");
 
-function Dispatch(folder, thread) {
-	this.folder = folder;
-	this.thread = thread;
+function Dispatch(config) {
+	this.folder = config.download;
+	this.thread = config.thread;
 }
 Dispatch.prototype.pipe = function() {
 	return new Promise(function(resolve) {
@@ -25,18 +25,11 @@ Dispatch.prototype.url = function(url) {
 	return this.download([url]);
 }
 Dispatch.prototype.download = function(urls) {
+	var self = this;
 	return urls.filter(function(el) { return el.trim() !== "" })
 		.forEach(function(url) {
-			(new PLine(url)).run();
+			(new PLine(url, self.folder)).run();
 		})
-	// 	.map(function(url) { return new PLine(url) })
-	// 	.reduce(function(seq, el) {
-	// 	return seq.then(function() {
-	// 		el.run()
-	// 	})
-	// }, Promise.resolve()).then(function() {
-	// 	console.log("下载完毕");
-	// });
 }
 
-module.exports = function(folder, thread) { return new Dispatch(folder, thread) }
+module.exports = function(config) { return new Dispatch(config) }

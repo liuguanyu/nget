@@ -1,5 +1,7 @@
 #!/usr/bin/env node 
-var cli = require("commander");
+var cli = require("commander"),
+	fs = require("fs"),
+	path = require("path");
 
 cli.
 	allowUnknownOption().
@@ -10,15 +12,16 @@ cli.
 	option("-t, --thread [value]", "download thread number").
 	parse( process.argv );
 
-//线程数参数设置
-var thread = 5;
-if(cli.thread && typeof(cli.thread)=="string") thread = parseInt(cli.thread);
+// 载入配置
+var config = require("./config.json");
+if(cli.thread && typeof(cli.thread)=="string") config.thread = parseInt(cli.thread);
+if(cli.download && typeof(cli.download)=="string") config.download = cli.download;
+fs.writeFile(
+	path.resolve(__dirname,"config.json"), 
+	JSON.stringify(config, null, "\t")
+);
 
-//下载地址配置
-var folder = "./";
-if(cli.download && typeof(cli.download)=="string") folder = cli.download;
-
-var dispatch = require("./pline/dispatch.js")(folder, thread);
+var dispatch = require("./pline/dispatch.js")(config);
 //检测是否是管道
 if(!process.stdin.isTTY) return dispatch.pipe();
 
