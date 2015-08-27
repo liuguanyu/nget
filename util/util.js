@@ -79,7 +79,6 @@ var fsUtil = {
 	    }
 
 	    fs.mkdirSync(dir);
-	    console.log(dir);
 	    return dir;
     }
 
