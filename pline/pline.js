@@ -14,8 +14,9 @@ var getSiteNameByUrl = function (url){
 	return siteInfo[siteInfo.length - 2];
 };
 
-var PLine = function (url){
+var PLine = function (url, folder){
 	this.url = url;
+	this.workPath = folder;
 };
 
 PLine.prototype = {
@@ -31,8 +32,6 @@ PLine.prototype = {
 		console.log("正在下载：" + data.title);
 		console.log("总大小：" + util.spaceUtil.getSize(data.size));
 		console.log("分块数：" + data.urls.length);
-
-		this.workPath = path.resolve(__dirname, "..");
 
 		return util.downloadUtil.download(data.urls, data.site_postfix);
 	},
@@ -55,8 +54,7 @@ PLine.prototype = {
 				rets.push(el);
 			});
 
-			var finalFile = path.resolve(self.workPath + "/" + self.title + "." + postfix);
-
+			var finalFile = path.resolve( self.workPath, [self.title, postfix].join("."));
 			return transcoder.mergeAndTranscode(rets, finalFile);
 		});
 	},
