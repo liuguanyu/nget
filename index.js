@@ -1,38 +1,31 @@
-#!node --harmony
+#!/usr/bin/env node 
+var cli = require("commander"),
+	fs = require("fs"),
+	path = require("path");
 
-var fs = require("fs");
-var PLine = require("./pline/pline.js");
+cli.
+	allowUnknownOption().
+	version( require("./package.json").version ).
+	option("-f, --file [value]", "download urls' file").
+	option("-u, --url [value]", "download url").
+	option("-d, --download [value]", "download folder").
+	option("-t, --thread [value]", "download thread number").
+	parse( process.argv );
 
-var args = process.argv.slice(2);
-var promise = new Promise(function(resolve){
-	if (args[0] == "."){
-		fs.readFile("download.txt", function (err, data){
-			if (err) throw err;
-			resolve(data.toString().split("\n"));
-		});
-	}
-	else if (args.length) {
-		resolve(args);
-	}
-	else {
-		var data = "";
-		process.stdin.resume(); // Compatible with "old" stream
-		process.stdin.setEncoding('utf8');
-		process.stdin.on('data', function(chunk) {
-			data += chunk.toString();
-		});
+// 载入配置
+var config = require("./config.json");
+if(cli.thread && typeof(cli.thread)=="string") config.thread = parseInt(cli.thread);
+if(cli.download && typeof(cli.download)=="string") config.download = cli.download;
+fs.writeFile(
+	path.resolve(__dirname,"config.json"), 
+	JSON.stringify(config, null, "\t")
+);
 
-		process.stdin.on('end', function() {
-			resolve(data.split("\n"));
-		});
-	}
-});
+var dispatch = require("./pline/dispatch.js")(config);
+//检测是否是管道
+if(!process.stdin.isTTY) return dispatch.pipe();
 
-promise.then(function (downloadList) {
-	downloadList.filter(function (el){
-		return (el.trim() !== "");
-	}).forEach(function (el){
-		var pline = new PLine(el);
-		pline.run();
-	});
-})
+//非管道检测有下载列表，有下载URL，无下载列表和下载URL三种情况，优先级下载列表大于URL
+if(cli.file && typeof(cli.file)=="string") return dispatch.file(cli.file);
+else if(cli.url && typeof(cli.url)=="string") return dispatch.url(cli.url);
+else return dispatch.file("./download.txt");

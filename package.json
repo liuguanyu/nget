@@ -1,6 +1,6 @@
 {
   "name": "ngetter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "下载视频网站视频流，并且转码",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,7 @@
   "author": "liuguanyu",
   "license": "MIT",
   "dependencies": {
+    "commander": "^2.8.1",
     "crypto": "0.0.3",
     "http": "0.0.0",
     "immutable": "^3.7.4",

@@ -79,7 +79,6 @@ var fsUtil = {
 	    }
 
 	    fs.mkdirSync(dir);
-
 	    return dir;
     }
 
@@ -117,7 +116,7 @@ var downloadUtil = {
 
 	download : function (urls, downloadPostfix, workPath){
 		if (typeof workPath === "undefined"){
-			workPath = path.resolve(__dirname, '..', (+new Date()) + '');
+			workPath = path.resolve(__dirname, '..', require("../config.json").download, (+new Date()) + '');
 		}
 
 		workPath = util.fsUtil.mkdir(workPath); // 如有重名，会改变
