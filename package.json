@@ -10,6 +10,7 @@
   "author": "liuguanyu",
   "license": "MIT",
   "dependencies": {
+    "big-integer": "^1.5.6",
     "commander": "^2.8.1",
     "crypto": "0.0.3",
     "http": "0.0.0",
