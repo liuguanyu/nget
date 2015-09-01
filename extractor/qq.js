@@ -2,6 +2,7 @@ var uuid = require("uuid");
 var md5 = require("md5");
 var xml2js = require('xml2js');
 var bigInt = require("big-integer");
+var iconv = require("iconv-lite");
 
 var util = require("../util/util.js");
 
@@ -21,36 +22,111 @@ var strsum = function (data){
 	}, 0)).and(0x7fffffff).toString(), 10);
 };
 
-var tea_encrypt = function (v, key){
-    // delta = 0x9e3779b9
-    // s = 0
-    // v = unpack(v)
-    // rounds = 16
-    // while rounds:
-    //     s += delta
-    //     s &= 0xffffffff
-    //     v[0] += (v[1]+s) ^ ((v[1]>>5)+key[1]) ^ ((v[1]<<4)+key[0])
-    //     v[0] &= 0xffffffff
-    //     v[1] += (v[0]+s) ^ ((v[0]>>5)+key[3]) ^ ((v[0]<<4)+key[2])
-    //     v[1] &= 0xffffffff
-    //     rounds = rounds - 1
-    // return pack(v)
+var repeat = function (val, times){
+	var ret = [];
+
+    for (var i = 0 ; i < times ; ++i){
+    	ret = ret.concat([0x00]);
+    }
+
+    return ret;
+}
+
+var structPack = function (el){
+	var getPack = function (el){
+		if (Math.floor(el/256) < 1){
+			return [el % 256];
+		}
+		else{
+			return [el % 256].concat(getPack(Math.floor(el / 256)));
+		}
+	};
+
+	var r = getPack(parseInt(el, 10));
+
+	return [0, 1, 2, 3].map(function(node){
+		return r[node] === undefined ? 0 : r[node];
+	}).reverse();
+};
+
+var pack = function (data){
+    return [].concat(structPack(data[0])).concat(structPack(data[1]));
+};
+
+var unpack = function (data){
+	var pow256 = function (list){
+		return [list.reduce(function(prev, curr, index){
+			return prev + curr * Math.pow(256, 3-index);
+		}, 0)];
+	}
+
+	return [].concat(pow256(data.slice(0, 4))).concat(pow256(data.slice(4, 8)));
+};
+
+var teaEncrypt = function (v, key){
+	var delta = bigInt(0x9e3779b9), s = bigInt(0);
+
+	v = unpack(v);
+
+	v2 = v.map(function(el){
+		return bigInt(el);
+	});
+
+	for (var i = 16; i > 0 ; --i){
+		s = s.add(delta);
+		s = s.and(0xffffffff);
+
+	    v2[0] = v2[0].add(
+	    			  v2[1].add(s)
+	    			  .xor(v2[1].shiftRight(5).add(key[1]))
+	    			  .xor(v2[1].shiftLeft(4).add(key[0]))
+	    	    );
+
+	    v2[0] = v2[0].and(0xffffffff);
+
+	    v2[1] = v2[1].add(
+    				v2[0].add(s)
+    				.xor(v2[0].shiftRight(5).add(key[3]))
+    				.xor(v2[0].shiftLeft(4).add(key[2]))
+	    		);
+        v2[1] = v2[1].and(0xffffffff);
+	}
+
+	v = v2.map(function (el){
+		return parseInt(el.toString(), 10);
+	});
+
+	return pack(v);
 };
 
 var qqEncrypt = function (data, key){
-    // temp = [0x00]*8
-    // enc = tea_encrypt(data, key)
-    // for i in range(8, len(data), 8):
-    //     d1 = data[i:]
-    //     for j in range(8):
-    //         d1[j] = d1[j] ^ enc[i+j-8]
-    //     d1 = tea_encrypt(d1, key)
-    //     for j in range(len(d1)):
-    //         d1[j] = d1[j]^data[i+j-8]^temp[j]
-    //         enc.append(d1[j])
-    //         temp[j] = enc[i+j-8]
-    // return enc
-    var enc = '';
+	var temp = repeat(0x00, 8),
+	    enc = teaEncrypt(data, key);
+
+	for (var i = 8 ; i < data.length; i+=8){
+		var d1 = data.slice(i).map(function(el){
+			return bigInt(el);
+		});
+
+		for (var j = 0; j < 8; ++j){
+			d1[j] = d1[j].xor(enc[i+j-8]);
+		}
+
+		d1 = d1.map(function(el){
+			return el.valueOf();
+		});
+
+		d1 = teaEncrypt(d1, key).map(function(el){
+			return bigInt(el);
+		});
+
+		for (var j = 0; j < d1.length; ++j){
+			d1[j] = d1[j].xor(data[i+j-8]).xor(temp[j]).valueOf();
+			enc.push(d1[j]);
+			temp[j] = enc[i+j-8];
+		}
+	}
+
     return enc;
 };
 
@@ -60,39 +136,15 @@ var ccc = function (timestamp){
         d = [0x3039, 0x02, timestamp, playerPlatform, strsum(playerVersion), strsum(s1)],
         data = [0xa6, 0xf1, 0xd9, 0x2a, 0x82, 0xc8, 0xd8, 0xfe, 0x43];
 
-        d.forEach(function (el){
-    		var getPack = function (el){
-    			if (Math.floor(el/256) < 1){
-    				return [el % 256];
-    			}
-    			else{
-    				return [el % 256].concat(getPack(Math.floor(el / 256)));
-    			}
-    		};
+    d.forEach(function (el){
+		data = data.concat(structPack(el));
+    });
 
-    		var r = getPack(parseInt(el, 10));
+    data = data.concat(repeat(0x00, 7));
 
-    		var ret = [0, 1, 2, 3].map(function(node){
-    			return r[node] === undefined ? 0 : r[node];
-    		}).reverse();
+    var enc = qqEncrypt(data, key);
 
-    		data = data.concat(ret);
-        });
-
-        for (var i = 0 ; i < 7 ; ++i){
-        	data = data.concat([0x00]);
-        }
-
-        var enc = qqEncrypt(data, key);
-
-		//[166, 241, 217, 42, 130, 200, 216, 254, 67, 0, 0, 48, 57, 0, 0, 0, 2, 85, 228, 54, 211, 0, 0, 0, 11, 0, 93, 165, 255, 75, 86, 236, 148]
-// [0, 93, 165, 255]
-
-
-        // console.log(d);
-// [12345, 2, 1441013873, 11, 6137343, 1263987860] 583467416254095926783
-// 3.2.18.285 583467416254095900000 6094848
-
+	console.log(base64.encode("enc"));
 };
 
 var loadKey = function (){
