@@ -6,7 +6,7 @@ var util = require("../util/util.js");
 
 var mix = function (tvid){
     var enc = [], src="hsalf", tm = Math.floor(Math.random() * (4000 - 2000) + 2000);
-    	enc.push("3601ba290e4f4662848c710e2122007e");
+    	enc.push("3cba91f1453145438ac5e4f5983bc086");
 	enc.push(tm);
 	enc.push(tvid);
 
