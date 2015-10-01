@@ -5,8 +5,9 @@ var md5 = require("md5");
 var util = require("../util/util.js");
 
 var mix = function (tvid){
-    var enc = [], src="hsalf", tm = Math.floor(Math.random() * (4000 - 2000) + 2000);
-    	enc.push("3cba91f1453145438ac5e4f5983bc086");
+    var enc = [], src="eknas", tm = Math.floor(Math.random() * (4000 - 2000) + 2000);
+    
+    enc.push("a6f2a01ab9ad4510be0449fab528b82c");
 	enc.push(tm);
 	enc.push(tvid);
 
@@ -21,7 +22,7 @@ var getVMS = function (tvid, vid, uid){
 
      vmsreq += "&tvId=" + tvid + "&vid=" + vid + "&vinfo=1&tm=" + params[0];
      vmsreq += "&enc=" + params[1];
-     vmsreq += "&qyid=" + uid + "&tn=" + Math.random() +"&um=0";
+     vmsreq += "&qyid=" + uid + "&tn=" + Math.random() +"&um=1";
      vmsreq += "&authkey=" + md5([params[0], tvid].join(''));
 
      return util.httpUtil.getHtml(vmsreq);

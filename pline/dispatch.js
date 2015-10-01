@@ -1,7 +1,8 @@
 var PLine = require("./pline.js");
+var path = require("path");
 
 function Dispatch(config) {
-	this.folder = config.download;
+	this.folder = path.resolve(config.download);
 	this.thread = config.thread;
 }
 Dispatch.prototype.pipe = function() {
@@ -19,7 +20,7 @@ Dispatch.prototype.file = function(file) {
 			if(err) reject(err);
 			resolve(data.toString().split("\n"));
 		})
-	}).then(this.download).catch(function(error) { console.log(error) });
+	}).then(this.download.bind(this)).catch(function(error) { console.log(error) });
 }
 Dispatch.prototype.url = function(url) {
 	return this.download([url]);

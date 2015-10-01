@@ -49,7 +49,7 @@ PLine.prototype = {
 
 		return Promise.all(promises).then(function (){
 			var rets = [];
-
+			
 			arguments[0].forEach(function(el){
 				rets.push(el);
 			});
@@ -82,7 +82,7 @@ PLine.prototype = {
 		}).then(function (data){
 			console.log("任务完成");
 		}).catch(function (err){
-			console.log(err);
+			console.log(err.stack);
 		});
 	}
 };
