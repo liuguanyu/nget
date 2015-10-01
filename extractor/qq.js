@@ -1,3 +1,4 @@
+/*
 var uuid = require("uuid");
 var md5 = require("md5");
 var xml2js = require('xml2js');
@@ -206,5 +207,42 @@ qq.prototype = {
 		});
 	}
 }
+*/
+var util = require("../util/util.js");
 
+var api = "http://vv.video.qq.com/geturl?otype=json&vid=%s";
+
+var getVideoInfo = function (content){
+    var match1 = content.match(/vid\s*:\s*"\s*([^"]+)"/),
+        match2 = content.match(/title\s*:\s*"\s*([^"]+)"/);
+
+    return [match1[1], match2[1]];
+};
+
+
+var qq = function (){};
+
+qq.prototype = {
+		extract : function (url){
+			return util.httpUtil.getHtml(url).then(function (html){
+				var videoInfo = getVideoInfo(html),
+				    url = api.replace(/%s/, videoInfo[0]);
+
+				return util.httpUtil.getHtml(url).then(function (html){
+					eval(html);
+
+					var realUrl = QZOutputJson['vd']['vi'][0]['url'];
+
+					return util.httpUtil.getUrlSize(realUrl).then(function(size){
+						console.info(size);
+						return {
+							size : size,
+							urls : [realUrl],
+							title : videoInfo[1]
+						};
+					});
+				});   
+	        });
+        }		    	
+}
 module.exports = qq;

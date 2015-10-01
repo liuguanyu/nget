@@ -22,7 +22,7 @@ var httpUtil = {
 		var opt = {
 			'headers' : headers,
 			'url' : url
-		}
+		};
 
 		return new Promise(function (resolve, reject){
 			var req = request.get(opt);
@@ -63,6 +63,28 @@ var httpUtil = {
 				reject(err);
 			});
 		});
+	},
+
+	getUrlSize : function(url){
+		var opt = {
+			'headers' : headers,
+			'url' : url
+		};
+
+		return new Promise(function (resolve, reject){
+			var req = http.request(opt, function(res) {
+				var resHeaders = res.headers;
+			    if (headers['transfer-encoding'] != 'chunked'){
+			        size = parseInt(headers['content-length'], 10);
+			    }
+			    else{
+			        size = 0;
+			    }
+
+			    resolve(size);
+			});
+		});
+
 	}
 }
 
