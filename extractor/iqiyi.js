@@ -7,7 +7,7 @@ var util = require("../util/util.js");
 var mix = function (tvid){
     var enc = [], src="eknas", tm = Math.floor(Math.random() * (4000 - 2000) + 2000);
     
-    enc.push("a6f2a01ab9ad4510be0449fab528b82c");
+    enc.push("97596c0abee04ab49ba25564161ad225");
 	enc.push(tm);
 	enc.push(tvid);
 
