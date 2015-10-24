@@ -25,42 +25,30 @@ module.exports = {
         });
 	},
 
-	mergeAndTranscode : function (nodes, finalFile){
-		var rets = [] , myPath;
-		nodes.forEach(function (el){
-			rets.push(el.file);
-		});
+    mergeAndTranscode : function (nodes, finalFile){
+        var rets = [] , myPath;
+        nodes.forEach(function (el){
+            rets.push(el.file);
+        });
 
-		myPath = nodes[0]["path"];
+        myPath = nodes[0]["path"];
 
-	    var targetFile = path.resolve(myPath, '.', "output.mp4");
+        // var targetFile = path.resolve(myPath, '.', "output.mp4");
 
-      	var cmd = 'ffmpeg -i concat:\"' + rets.join("|") + '\" -acodec copy -vcodec copy -absf aac_adtstoasc \"' + targetFile + '\" -loglevel  -8';
+        var cmd = 'ffmpeg -i concat:\"' + rets.join("|") + '\" -acodec copy -vcodec copy -absf aac_adtstoasc \"' + finalFile + '\" -loglevel  -8';
 
-		return new Promise(function (resolve, reject){
-		    exec(cmd, function (err, stdout, stderr){
-				if (err){
-					reject(err);
-				}
-				else{
-                    resolve();
-				}
-		    });
-		}).then(function (){
-            return new Promise(function (resolve, reject){
-                var cmd = "ffmpeg -y -i " + targetFile + " \"" + finalFile + "\" -loglevel  -8";
-
-                exec(cmd, function (err, stdout, stderr){
-                    if (err){
-                        reject(err);
-                    }
-
+        return new Promise(function (resolve, reject){
+            exec(cmd, function (err, stdout, stderr){
+                if (err){
+                    reject(err);
+                }
+                else{
                     resolve({
                         finalFile : finalFile,
                         workPath : myPath
                     });
-                });
+                }
             });
         });
-	}
+    }        
 };

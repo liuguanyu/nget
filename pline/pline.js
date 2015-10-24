@@ -76,7 +76,7 @@ PLine.prototype = {
 			self.title = data.title;
 			return self.download(data);
 		}).then(function (data){
-			return self.transcode(data, "mov"); // 暂时只加mov
+			return self.transcode(data, "mp4"); // 暂时只加mov
 		}).then(function (data){
 			self.clean(data);
 		}).then(function (data){
