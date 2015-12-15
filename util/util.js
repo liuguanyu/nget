@@ -6,17 +6,23 @@ var headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0'
 };
 
+
 var fs = require("fs");
 var path = require("path");
 var request = require('request');
 var urlparse = require('url').parse;
 var http = require('http');
 var zlib = require('zlib');
+var Download = require('download');
 
 var httpUtil = {
-	getHtml : function (url, userAgent){
+	getHtml : function (url, userAgent, toString){
 		if (userAgent){
 			headers["User-Agent"] = userAgent;
+		}
+
+		if (toString === undefined){
+			toString = true;
 		}
 
 		var opt = {
@@ -43,7 +49,9 @@ var httpUtil = {
 							if (err){
 								reject(err);
 							}
-							resolve(decoded.toString());
+
+							var ret = toString === undefined ? decoded : decoded.toString();
+							resolve(ret);
 						});
 					}
 					else if (encoding == 'deflate') {
@@ -51,11 +59,13 @@ var httpUtil = {
 							if (err){
 								reject(err);
 							}
-							resolve(decoded.toString());
+							var ret = toString === undefined ? decoded : decoded.toString();
+							resolve(ret);
 						});
 					}
 					else {
-						resolve(buffer.toString());
+						var ret = toString === undefined ? buffer : buffer.toString();
+						resolve(ret);
 					}
 				});
 			});
@@ -109,30 +119,39 @@ var fsUtil = {
 var downloadUtil = {
 	downloadAndSave : function (url, savefile) {
 		return new Promise(function (resolve, reject){
-		    var urlinfo = urlparse(url);
+			// url = "http://42.81.80.162:80/178/6/77/letv-uts/14/ver_00_22-1009154802-avc-3012372-aac-128000-2583200-1017852967-0c7735268d4b38883aa086810e01cef4-1449630661353_mp4/ver_00_22_149_710_2_13924032_1032162300.ts?mltag=1&platid=1&splatid=101&playid=0&geo=CN-1-0-1&tag=letv&ch=&p1=&p2=&p3=&tss=ios&b=3152&bf=29&nlh=3072&path=&sign=letv&proxy=709953101,1711200372,3683272603&uuid=&ntm=1450188000&keyitem=GOw_33YJAAbXYE-cnQwpfLlv_b2zAkYctFVqe5bsXQpaGNn3T1-vhw..&its=0&nkey2=858cbe1db8fa85cbde01aec61751a3f6&uid=3659428872.rp&qos=4&enckit=&m3v=1&token=&vid=&liveid=&station=&app_name=&app_ver=&fcheck=0";
+		    
+		 //    var urlinfo = urlparse(url);
 
-		    var options = {
-		        method: 'GET',
-		        host: urlinfo.host,
-		        path: urlinfo.pathname,
-		        headers: headers
-		    };
+		 //    var options = {
+		 //        method: 'GET',
+		 //        host: urlinfo.host,
+		 //        path: urlinfo.pathname,
+		 //        headers: headers
+		 //    };
 
-		    if(urlinfo.port) {
-		        options.port = urlinfo.port;
-		    }
-		    if(urlinfo.search) {
-		        options.path += urlinfo.search;
-		    }
+		 //    if(urlinfo.port) {
+		 //        options.port = urlinfo.port;
+		 //    }
+		 //    if(urlinfo.search) {
+		 //        options.path += urlinfo.search;
+		 //    }
 
-		    var req = http.request(options, function(res) {
-		        var writestream = fs.createWriteStream(savefile);
-		        writestream.on('close', function() {
-		            resolve(res);
-		        });
-		        res.pipe(writestream);
-		    });
-		    req.end();
+		 //    var req = http.request(options, function(res) {
+		 //        var writestream = fs.createWriteStream(savefile);
+		 //        writestream.on('close', function() {
+		 //            resolve(res);
+		 //        });
+		 //        res.pipe(writestream);
+		 //    });
+		 //    req.end();
+			new Download({mode: '755'})
+			    .get(url)
+			    .dest(path.dirname(savefile))
+			    .rename(path.basename(savefile))
+			    .run(function (){
+			    	resolve();
+			    });
 		});
 	},
 

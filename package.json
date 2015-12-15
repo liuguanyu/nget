@@ -13,6 +13,7 @@
     "big-integer": "^1.5.6",
     "commander": "^2.8.1",
     "crypto": "0.0.3",
+    "download": "^4.4.3",
     "http": "0.0.0",
     "iconv-lite": "^0.4.11",
     "immutable": "^3.7.4",
