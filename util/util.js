@@ -50,7 +50,7 @@ var httpUtil = {
 								reject(err);
 							}
 
-							var ret = toString === undefined ? decoded : decoded.toString();
+							var ret = toString ? decoded.toString() : decoded;
 							resolve(ret);
 						});
 					}
@@ -59,12 +59,12 @@ var httpUtil = {
 							if (err){
 								reject(err);
 							}
-							var ret = toString === undefined ? decoded : decoded.toString();
+							var ret = toString ? decoded.toString() : decoded;
 							resolve(ret);
 						});
 					}
 					else {
-						var ret = toString === undefined ? buffer : buffer.toString();
+						var ret = toString ? buffer.toString() : buffer;
 						resolve(ret);
 					}
 				});
